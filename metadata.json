@@ -1,0 +1,17 @@
+{
+  "name" : "Eighty/20 Results - License on Purchase",
+  "slug" : "e20r-add-license-for-level",
+  "download_url" : "https://eighty20results.com/protected-content/e20r-add-license-on-purchase/e20r-add-license-on-purchase-1.0.zip",
+  "version" : "1.0",
+  "tested" : "4.8.1",
+  "requires" : "4.7",
+  "author" : "Thomas Sjolshagen <thomas@eighty20results.com>",
+  "author_homepage" : "https://eighty20results.com/thomas-sjolshagen",
+  "last_updated" : "2017-05-07 19:45:00",
+  "homepage" : "https://eighty20results.com/wordpress-plugins/e20r-add-license-on-purchase/",
+  "sections" : {
+    "description" : "Adds user specific license key when a PMPro Membership Level or WooCommerce product sale in completed",
+    "changelog" : "",
+    "faq" : "<h3>I found a bug in the plugin.</h3>Please report your issue to us by using the <a href='https://eighty20results.com/support-forums/' target='_blank'>Support Forum</a> on The Eighty / 20 Website and we'll try to provide an initial response within 1 business day."
+    }
+}
