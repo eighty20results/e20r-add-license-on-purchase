@@ -52,6 +52,7 @@ class WooCommerce {
 		$orders = Orders::getInstance();
 		
 		add_action( 'admin_enqueue_scripts', array( $this, 'loadScripts' ), 10 );
+		add_filter( 'e20r-license-server-slm-settings', array( $this, 'addSettings'), 10, 2 );
 		
 		add_filter( 'woocommerce_get_sections_products', array( $settings, 'section' ), 10, 1 );
 		add_filter( 'woocommerce_get_settings_products', array( $settings, 'settings' ), 10, 2 );
@@ -71,6 +72,61 @@ class WooCommerce {
 		add_filter( 'e20r-licensing-server-client-key', array( $orders, 'create' ), 10, 4 );
 		add_filter( 'e20r-license-server-domains-per-license', array( $orders, 'domains' ), 10, 3 );
 		add_filter( 'e20r-license-server-license-name', array( $orders, 'licenseName' ), 10, 3 );
+	}
+	
+	public function addSettings( $settings, $source ) {
+		
+		if ( 'woocommerce' != $source ) {
+			return $settings;
+		}
+		
+		$utils = Utilities::get_instance();
+		
+		$settings = array();
+		
+		// Add Title to the Settings
+		$settings[] = array(
+			'name' => __( 'Software License Manager Settings', 'e20r-add-license-on-purchase' ),
+			'type' => 'title',
+			'desc' => __('The following options are used to connect to the license manager software/plugin.', 'e20r-add-license-on-purchase' ),
+			'id'   => 'wcslider',
+		);
+		
+		// API URL Option filed
+		$settings[] = array(
+			'name'     => __( 'API URL', 'e20r-add-license-on-purchase' ),
+			'desc_tip' => __( 'Add the URL to the server where the Software Manager plugin is installed and configured', 'e20r-add-license-on-purchase' ),
+			'id'       => 'e20rlm_api_url',
+			'css'      => 'min-width: 300px;',
+			'type'     => 'text',
+			'desc'     => '',
+		);
+		
+		// Secret Key for Creating new license
+		$settings[] = array(
+			'name'     => __( "Create License key", 'e20r-add-license-on-purchase' ),
+			'desc_tip' => __( 'The secret key used to securely connect to the License Manager software, and create a new license', 'e20r-add-license-on-purchase'),
+			'id'       => 'e20rlm_api_create_secret',
+			'type'     => 'password',
+			'css'      => 'min-width: 300px;',
+			'desc'     => '',
+		);
+		
+		$settings[] = array(
+			'name'     => __( "Verify License key", 'e20r-add-license-on-purchase' ),
+			'desc_tip' => __( 'The secret key used to securely connect to the License Manager software, and verify a license', 'e20r-add-license-on-purchase'),
+			'id'       => 'e20rlm_api_verify_secret',
+			'type'     => 'password',
+			'css'      => 'min-width: 300px;',
+			'desc'     => '',
+		);
+		
+		$settings[] = array(
+			'type' => 'sectionend',
+			'id'   => 'wcslider',
+		);
+		
+		return $settings;
 	}
 	
 	/**
