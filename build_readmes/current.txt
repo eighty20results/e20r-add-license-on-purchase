@@ -1,1 +1,19 @@
-BUG/FIX: Didn't handle non-MMPU check-outs/updates
+ENHANCEMENT: Add WooCommerce support
+ENHANCEMENT: Add JavaScript for WooCommerce product options page
+ENHANCEMENT: Add Paid Memberships Pro checkout page support
+ENHANCEMENT: Configure own settings menu option when using Paid Memberships Pro
+ENHANCEMENT: Add PMPro settings page for Software License Manager
+ENHANCEMENT: Add AJAX save of PMPro/Software License Manager settings page
+ENHANCEMENT: Use global options/settings for Software License Manager configuration (keys, URLs)
+ENHANCEMENT: Styling for the PMPro/Software License Manager settings page ("Software Licenses")
+ENHANCEMENT: Transition WooCommerce settings array to filter for global settings (PMPro & WooCommerce uses same structure in this plugin)
+ENHANCEMENT: Standardize path to plugin directory
+ENHANCEMENT: Load shortcode handler [for e20r_user_licenses]
+ENHANCEMENT: Display license settings on Membership Level configuration page for Paid Memberships Pro
+ENHANCEMENT: Use filters to include payment service specific settings/info when generating license
+ENHANCEMENT: Don't expect the Software License Manager software to be installed locally
+ENHANCEMENT: Let admin specify the number of domains a license can be applied to in the PMPro Level settings
+BUG FIX: Include all required files/directories in build script
+BUG FIX: Append the new membership level(s) to the list of levels to check out (MMPU/Single level handling for Paid Memberships Pro)
+BUG FIX: Load correct path to the License email for Paid Memberships Pro
+BUG FIX: Argument order for getBillingInfo() filter handler (lost user info)
