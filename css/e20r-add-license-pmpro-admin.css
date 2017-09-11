@@ -1,0 +1,82 @@
+/**
+ * Copyright (c) 2017 - Eighty / 20 Results by Wicked Strong Chicks.
+ * ALL RIGHTS RESERVED
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+.e20r-hide {
+    display: none;
+}
+.pmpro-help-tip img.help_tip {
+    padding: 0;
+    margin: -4px 0 0 5px;
+    vertical-align: middle;
+    cursor: help;
+    line-height: 1;
+}
+.pmpro-help-tip {
+    color: #666;
+    display: inline-block;
+    font-size: 1.1em;
+    font-style: normal;
+    height: 16px;
+    line-height: 16px;
+    position: relative;
+    vertical-align: middle;
+    width: 16px;
+    float: right;
+}
+.pmpro-help-tip::after {
+    font-family: Dashicons;
+    speak: none;
+    font-weight: 400;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    text-indent: 0px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    content: "\f223";
+    cursor: help;
+    font-variant: normal;
+    margin: 0px;
+}
+.e20r-closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight:bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.e20r-closebtn:hover {
+    color: black;
+}
+#e20r-save-status {
+    padding: 20px;
+    color: white;
+    margin-bottom: 15px;
+}
+.e20r-success {
+    background-color: #4CAF50;
+}
+.e20r-error {
+    background-color: #f44336;
+}
