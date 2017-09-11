@@ -3,7 +3,7 @@
 #
 short_name="e20r-add-license-on-purchase"
 server="eighty20results.com"
-include=(class email languages plugin-updates $class.{short_name}.php README.txt)
+include=(class css email js languages plugin-updates class.${short_name}.php README.txt)
 exclude=(*.yml *.phar composer.* vendor)
 build=(plugin-updates/vendor/*.php)
 plugin_path="${short_name}"
