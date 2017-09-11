@@ -47,6 +47,10 @@ if ( ! defined( 'E20R_ALOP_URL' ) ) {
 	define( 'E20R_ALOP_URL', trailingslashit( plugins_url( null, __FILE__ ) ) );
 }
 
+if ( ! defined( 'E20R_ALOP_DIR' ) ) {
+	define( 'E20R_ALOP_DIR', trailingslashit( plugin_dir_path( __FILE__ ) ) );
+}
+
 global $e20rlm_level;
 global $e20rlm_order;
 
@@ -103,6 +107,8 @@ class Controller {
 		if ( true === $utils->plugin_is_active( null, 'pmpro_getAllLevels' ) ) {
 			add_action( 'init', array( PMPro::getInstance(), 'loadHooks' ), 10 );
 		}
+		
+		add_shortcode( 'e20r_user_licenses', array( $this, 'licenseShortcode' ) );
 	}
 	
 	/**
@@ -263,11 +269,9 @@ class Controller {
 	 * @return null|string
 	 */
 	public function licenseShortcode( $attrs = array() ) {
-		
-		if ( ! $this->checkPrereqs() ) {
-			return null;
-		}
-		
+     
+	    $utils = Utilities::get_instance();
+	    
 		global $current_user;
 		
 		if ( ! is_user_logged_in() ) {
@@ -280,8 +284,6 @@ class Controller {
 		if ( empty( $license_config ) ) {
 			return null;
 		}
-		
-		$license_map = get_option( 'e20r_pmpro_license_server' );
 		
 		ob_start(); ?>
         <h2><?php __( "Active Licenses", "e20r-add-license-on-purchase" ) ?></h2>
@@ -301,7 +303,7 @@ class Controller {
 					foreach ( $order as $product_id => $settings ) {
 						?>
                         <tr class="e20r-license-row">
-                            <td class="e20r-license-name"><?php echo isset( $license_map[ $product_id ]['item_reference'] ) ? esc_attr( $license_map[ $product_id ]['item_reference'] ) : null; ?></td>
+                            <td class="e20r-license-name"><?php echo isset( $settings['item_reference'] ) ? esc_attr( $settings['item_reference'] ) : null; ?></td>
                             <td class="e20r-license-key"><?php echo isset( $settings['license_key'] ) ? esc_attr( $settings['license_key'] ) : null; ?></td>
                             <td class="e20r-license-expiry"><?php echo isset( $settings['date_expiry'] ) ? esc_attr( $settings['date_expiry'] ) : null; ?></td>
                             <td class="e20r-license-email"><?php echo isset( $settings['email'] ) ? esc_attr( urldecode( $settings['email'] ) ) : null; ?></td>
@@ -556,8 +558,6 @@ spl_autoload_register( 'E20R\\Licensing\\Purchase\\Controller::autoLoader' );
 
 add_action( 'plugins_loaded', array( Controller::getInstance(), 'loadHooks' ) );
 add_action( 'http_api_curl', array( Utilities::get_instance(), 'force_tls_12' ) );
-
-add_shortcode( 'e20r_user_licenses', array( Controller::getInstance(), 'licenseShortcode' ) );
 
 
 // One-click update handler
