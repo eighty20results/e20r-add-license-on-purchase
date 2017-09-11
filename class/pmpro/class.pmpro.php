@@ -48,6 +48,13 @@ class PMPro {
 	 */
 	public function loadHooks() {
 		
+	    add_action( 'admin_menu', array( Settings::getInstance(), 'addSLMSettings' ), 11 );
+        add_action( 'admin_bar_menu', array( Settings::getInstance(), 'loadMenuBarEntry' ), 1001 );
+        add_action( 'admin_enqueue_scripts', array( Settings::getInstance(), 'loadScripts' ) );
+        add_action( 'wp_ajax_e20r_save_pmpro_settings', array( Settings::getInstance(), 'save' ) );
+        
+		add_filter( 'e20r-license-server-slm-settings', array( Settings::getInstance(), 'fieldDefs'), 10, 2 );
+		
 		add_action( 'pmpro_save_membership_level', array( $this, 'saveSettings' ), 10, 1 );
 		add_action( 'pmpro_after_change_membership_level', array( $this, 'levelChanged' ), 10, 3 );
 		add_action( 'pmpro_membership_level_after_other_settings', array( $this, 'licenseSettings', ), 10, 1 );
@@ -58,9 +65,9 @@ class PMPro {
 		add_filter( 'e20r-licensing-server-client-key', array( $this, 'createLicenseKey' ), 10, 4 );
 		add_filter( 'e20r-license-server-domains-per-license', array( $this, 'domains' ), 10, 3 );
 		add_filter( 'e20r-license-server-license-name', array( $this, 'licenseName' ), 10, 3 );
+  
 	}
-	
-	
+ 
 	/**
 	 * Update the license if the membership level is changed to something positive (not 0)
 	 *
