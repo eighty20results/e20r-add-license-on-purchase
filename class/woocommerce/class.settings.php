@@ -74,49 +74,19 @@ class Settings {
 		
 		if ( $current_section == 'e20rlm' ) {
 			
+			$fields       = apply_filters( 'e20r-license-server-slm-settings', array(), 'woocommerce' );
 			$settings_slm = array();
 			
-			// Add Title to the Settings
-			$settings_slm[] = array(
-				'name' => __( 'Software License Manager Settings', 'e20r-add-license-on-purchase' ),
-				'type' => 'title',
-				'desc' => __('The following options are used to connect to the license manager software/plugin.', 'e20r-add-license-on-purchase' ),
-				'id'   => 'wcslider',
-			);
-			
-			// API URL Option filed
-			$settings_slm[] = array(
-				'name'     => __( 'API URL', 'e20r-add-license-on-purchase' ),
-				'desc_tip' => __( 'Add the URL to the server where the Software Manager plugin is installed and configured', 'e20r-add-license-on-purchase' ),
-				'id'       => 'e20rlm_api_url',
-				'css'      => 'min-width: 300px;',
-				'type'     => 'text',
-				'desc'     => '',
-			);
-			
-			// Secret Key for Creating new license
-			$settings_slm[] = array(
-				'name'     => __( "Create License key", 'e20r-add-license-on-purchase' ),
-				'desc_tip' => __( 'The secret key used to securely connect to the License Manager software, and create a new license', 'e20r-add-license-on-purchase'),
-				'id'       => 'e20rlm_api_create_secret',
-				'type'     => 'password',
-				'css'      => 'min-width: 300px;',
-				'desc'     => '',
-			);
-			
-			$settings_slm[] = array(
-				'name'     => __( "Verify License key", 'e20r-add-license-on-purchase' ),
-				'desc_tip' => __( 'The secret key used to securely connect to the License Manager software, and verify a license', 'e20r-add-license-on-purchase'),
-				'id'       => 'e20rlm_api_verify_secret',
-				'type'     => 'password',
-				'css'      => 'min-width: 300px;',
-				'desc'     => '',
-			);
-			
-			$settings_slm[] = array(
-				'type' => 'sectionend',
-				'id'   => 'wcslider',
-			);
+			foreach ( $fields as $entry_key => $entry ) {
+				
+				$entry_settings = array();
+				
+				foreach ( $entry as $s_key => $value ) {
+					$entry_settings[ $s_key ] = $value;
+				}
+				
+				$settings_slm[] = $entry_settings;
+			}
 			
 			return $settings_slm;
 			
@@ -148,48 +118,48 @@ class Settings {
 		$utils->log( "Settings for {$post->ID}: " . print_r( $license_settings, true ) );
 		
 		woocommerce_wp_checkbox(
-            array(
-                'id' => 'e20rlm_licensing_enabled',
-                'name' => 'e20rlm_licensing_enabled',
-                'wrapper_class' => 'show_if_downloadable',
-                'value' => empty( $enabled ) ? 'no' : 'yes',
-                'label' => __( 'Create license', 'e20r-add-license-on-purchase' ),
-                'description' => __('Create & activate a license key for the user?', 'e20r-add-license-on-purchase')
-            )
-        );
-  
-		woocommerce_wp_text_input(
-            array(
-                'id' => 'e20rlm_key_stub',
-                'name' => 'e20rlm_key_stub',
-                'value' => $license_stub,
-                'label' => __( "Client license prefix", 'e20r-add-license-on-purchase' ),
-                'description' => __( 'Product specific license prefix', 'e20r-add-license-on-purchase' ),
-                'wrapper_class' => 'e20r-toggled-hide',
-		    )
-        );
+			array(
+				'id'            => 'e20rlm_licensing_enabled',
+				'name'          => 'e20rlm_licensing_enabled',
+				'wrapper_class' => 'show_if_downloadable',
+				'value'         => empty( $enabled ) ? 'no' : 'yes',
+				'label'         => __( 'Create license', 'e20r-add-license-on-purchase' ),
+				'description'   => __( 'Create & activate a license key for the user?', 'e20r-add-license-on-purchase' ),
+			)
+		);
 		
 		woocommerce_wp_text_input(
-            array(
-                'id' =>     'e20rlm_renewal_period',
-                'name' => 'e20rlm_renewal_period',
-                'value' => $renewal_period,
-                'label' => __( "License renewal period",'e20r-add-license-on-purchase' ),
-                'description' => __( "No. of years. Use 0 as the 'lifetime' value.", 'e20r-add-license-on-purchase' ),
-                'wrapper_class' => 'e20r-toggled-hide',
-            )
-        );
+			array(
+				'id'            => 'e20rlm_key_stub',
+				'name'          => 'e20rlm_key_stub',
+				'value'         => $license_stub,
+				'label'         => __( "Client license prefix", 'e20r-add-license-on-purchase' ),
+				'description'   => __( 'Product specific license prefix', 'e20r-add-license-on-purchase' ),
+				'wrapper_class' => 'e20r-toggled-hide',
+			)
+		);
 		
 		woocommerce_wp_text_input(
-        array(
-		        'id' => 'e20rlm_sites_allowed',
-                'name' => 'e20rlm_sites_allowed',
-                'value' => $sites_allowed,
-                'label' => __( 'Sites per license', 'e20r-add-license-on-purchase' ),
-                'description' => __( 'How many sites does a key activate?', 'e20r-add-license-on-purchase' ),
-		        'wrapper_class' => 'e20r-toggled-hide',
-            )
-        );
+			array(
+				'id'            => 'e20rlm_renewal_period',
+				'name'          => 'e20rlm_renewal_period',
+				'value'         => $renewal_period,
+				'label'         => __( "License renewal period", 'e20r-add-license-on-purchase' ),
+				'description'   => __( "No. of years. Use 0 as the 'lifetime' value.", 'e20r-add-license-on-purchase' ),
+				'wrapper_class' => 'e20r-toggled-hide',
+			)
+		);
+		
+		woocommerce_wp_text_input(
+			array(
+				'id'            => 'e20rlm_sites_allowed',
+				'name'          => 'e20rlm_sites_allowed',
+				'value'         => $sites_allowed,
+				'label'         => __( 'Sites per license', 'e20r-add-license-on-purchase' ),
+				'description'   => __( 'How many sites does a key activate?', 'e20r-add-license-on-purchase' ),
+				'wrapper_class' => 'e20r-toggled-hide',
+			)
+		);
 	}
 	
 	/**
@@ -211,16 +181,16 @@ class Settings {
 			$renewal_period = null;
 			$key_stub       = null;
 		}
-  
+		
 		$license_settings = array(
-            'enabled'        => $enabled,
-            'site_count'     => $sites_allowed,
-            'renewal_period' => $renewal_period,
-            'key_stub'       => $key_stub,
-        );
-        
-        $utils->log( "Saving: " . print_r( $license_settings, true ));
-        update_post_meta( $post_id, '_e20rlm_license', $license_settings );
+			'enabled'        => $enabled,
+			'site_count'     => $sites_allowed,
+			'renewal_period' => $renewal_period,
+			'key_stub'       => $key_stub,
+		);
+		
+		$utils->log( "Saving: " . print_r( $license_settings, true ) );
+		update_post_meta( $post_id, '_e20rlm_license', $license_settings );
 		
 	}
 }
