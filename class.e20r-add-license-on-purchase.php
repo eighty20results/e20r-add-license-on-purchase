@@ -332,10 +332,7 @@ class Controller {
 	 *
 	 * @return bool|array
 	 */
-	public
-	function addLicense(
-		$id, $user_id, $source, $quantity = 1
-	) {
+	public function addLicense( $id, $user_id, $source, $quantity = 1 ) {
 		
 		$controller = Controller::getInstance();
 		$utils      = Utilities::get_instance();
@@ -450,10 +447,7 @@ class Controller {
 	 *
 	 * @return string
 	 */
-	public
-	function licenseInfo(
-		$licenses
-	) {
+	public function licenseInfo( $licenses ) {
 		
 		$utils = Utilities::get_instance();
 		
@@ -513,10 +507,7 @@ class Controller {
 	 * @since  1.0
 	 * @access public static
 	 */
-	public
-	static function autoLoader(
-		$class_name
-	) {
+	public static function autoLoader( $class_name ) {
 		
 		if ( false === stripos( $class_name, 'e20r' ) ) {
 			return;
