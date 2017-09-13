@@ -269,9 +269,9 @@ class Controller {
 	 * @return null|string
 	 */
 	public function licenseShortcode( $attrs = array() ) {
-     
-	    $utils = Utilities::get_instance();
-	    
+		
+		$utils = Utilities::get_instance();
+		
 		global $current_user;
 		
 		if ( ! is_user_logged_in() ) {
@@ -301,14 +301,16 @@ class Controller {
 				<?php
 				foreach ( $license_config as $key => $order ) {
 					foreach ( $order as $product_id => $settings ) {
-						?>
-                        <tr class="e20r-license-row">
-                            <td class="e20r-license-name"><?php echo isset( $settings['item_reference'] ) ? esc_attr( $settings['item_reference'] ) : null; ?></td>
-                            <td class="e20r-license-key"><?php echo isset( $settings['license_key'] ) ? esc_attr( $settings['license_key'] ) : null; ?></td>
-                            <td class="e20r-license-expiry"><?php echo isset( $settings['date_expiry'] ) ? esc_attr( $settings['date_expiry'] ) : null; ?></td>
-                            <td class="e20r-license-email"><?php echo isset( $settings['email'] ) ? esc_attr( urldecode( $settings['email'] ) ) : null; ?></td>
-                        </tr>
-						<?php
+						if ( ! empty( $settings['license_key'] ) ) {
+							?>
+                            <tr class="e20r-license-row">
+                                <td class="e20r-license-name"><?php echo isset( $settings['item_reference'] ) ? esc_attr( $settings['item_reference'] ) : null; ?></td>
+                                <td class="e20r-license-key"><?php echo isset( $settings['license_key'] ) ? esc_attr( $settings['license_key'] ) : null; ?></td>
+                                <td class="e20r-license-expiry"><?php echo isset( $settings['date_expiry'] ) ? esc_attr( $settings['date_expiry'] ) : null; ?></td>
+                                <td class="e20r-license-email"><?php echo isset( $settings['email'] ) ? esc_attr( urldecode( $settings['email'] ) ) : null; ?></td>
+                            </tr>
+							<?php
+						}
 					}
 				} ?>
                 </tbody>
@@ -330,7 +332,10 @@ class Controller {
 	 *
 	 * @return bool|array
 	 */
-	public function addLicense( $id, $user_id, $source, $quantity = 1 ) {
+	public
+	function addLicense(
+		$id, $user_id, $source, $quantity = 1
+	) {
 		
 		$controller = Controller::getInstance();
 		$utils      = Utilities::get_instance();
@@ -437,7 +442,7 @@ class Controller {
 		
 		return false;
 	}
- 
+	
 	/**
 	 * Return HTML table with License Information
 	 *
@@ -445,7 +450,10 @@ class Controller {
 	 *
 	 * @return string
 	 */
-	public function licenseInfo( $licenses ) {
+	public
+	function licenseInfo(
+		$licenses
+	) {
 		
 		$utils = Utilities::get_instance();
 		
@@ -505,7 +513,10 @@ class Controller {
 	 * @since  1.0
 	 * @access public static
 	 */
-	public static function autoLoader( $class_name ) {
+	public
+	static function autoLoader(
+		$class_name
+	) {
 		
 		if ( false === stripos( $class_name, 'e20r' ) ) {
 			return;
