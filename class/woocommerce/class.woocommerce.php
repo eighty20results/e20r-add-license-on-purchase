@@ -45,6 +45,8 @@ class WooCommerce {
 	
 	/**
 	 * Load required WooCommerce hooks
+	 *
+	 * @since 1.1 - BUG FIX: Didn't always trigger the Orders::complete() action handler
 	 */
 	public function loadHooks() {
 		
@@ -63,8 +65,8 @@ class WooCommerce {
 		add_action('woocommerce_email_before_order_table', array( EMail::getInstance(), 'content' ), 10, 4);
 		
 		add_action( 'woocommerce_order_details_after_order_table', array( $orders, 'metadata' ), 10, 1);
-		// add_action( 'woocommerce_order_status_completed', array( $orders, 'complete') , 10, 2 );
 		add_action( 'woocommerce_payment_complete', array( $orders, 'complete') , 10, 1 );
+		add_action( 'woocommerce_payment_complete_order_status_completed', array( $orders, 'complete') , 10, 1 );
 		
 		add_filter( 'e20r-license-server-txn-id', array( $orders, 'getTransactionId' ), 10, 3 );
 		add_filter( 'e20r-license-server-billing-info', array( $orders, 'getBillingInfo' ), 10, 3 );

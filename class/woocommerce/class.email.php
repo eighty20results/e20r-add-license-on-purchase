@@ -61,7 +61,7 @@ class EMail {
 		$utils = Utilities::get_instance();
 		$controller = Controller::getInstance();
 		
-		$utils->log("Sent_to_admin: {$sent_to_admin}: ");
+		$utils->log("Sent_to_admin? {$sent_to_admin}");
 		
 		$status = $order->get_status();
 		$order_id = $order->get_id();

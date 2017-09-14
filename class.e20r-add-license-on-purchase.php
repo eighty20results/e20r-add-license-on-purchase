@@ -219,7 +219,7 @@ class Controller {
 		if ( ! empty( $api_params ) ) {
 			
 			$server_url = add_query_arg( $api_params, E20R_LICENSE_SERVER_URL );
-			$utils->log( "Transmitting for action {$action}...: " . print_r( $api_params, true ) );
+			$utils->log( "Transmitting for action {$action}...: " );
 			$utils->log( "Sending to: {$server_url}" );
 			
 			// Send query to the license manager server
