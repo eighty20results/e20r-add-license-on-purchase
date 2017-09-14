@@ -24,6 +24,11 @@ For Paid Memberships Pro we configure the license settings as part of an annual 
 
 NOTE: This plugin will simplify selling license keys from your WooCommerce Shop, or as part of a Paid Memberships Pro membership level. It does *not* include a kit to check licenses from a plugin. To do that, you would need something like our E20R Licensing Client Toolkit (for sale), or you can create your own.
 
+== Missing features ==
+
+* Renewal option for a license from the [e20r_user_licenses] short code
+* Manual renewal on checkout page
+
 == Installation ==
 
 1. Upload the `e20r-add-license-on-purchase` directory to the `/wp-content/plugins/` directory of your site.
