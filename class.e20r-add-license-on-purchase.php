@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: E20R: Add license on purchase
+Plugin Name: E20R Add license on purchase
 Plugin URI: https://eighty20results.com/wordpress-plugins/e20r-add-license-for-level/
 Description: Sell software licenses from WooCommerce or Paid Memberships Pro
 Version: 1.1
