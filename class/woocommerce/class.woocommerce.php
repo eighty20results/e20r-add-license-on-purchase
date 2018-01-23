@@ -68,7 +68,26 @@ class WooCommerce {
 		add_action( 'woocommerce_payment_complete', array( $orders, 'complete') , 10, 1 );
 		add_action( 'woocommerce_payment_complete_order_status_completed', array( $orders, 'complete') , 10, 1 );
 		
-		add_filter( 'e20r-license-server-txn-id', array( $orders, 'getTransactionId' ), 10, 3 );
+		/*
+		// For Subscription(s) - TODO: Update function to call
+		add_action('woocommerce_subscription_status_active', 'pmprowoo_activated_subscription');
+		add_action('woocommerce_subscription_status_on-hold_to_active', 'pmprowoo_activated_subscription');
+		*/
+		add_action( "woocommerce_order_status_refunded", array( $orders, 'cancelled' ), 10, 1 );
+		add_action( "woocommerce_order_status_failed", array( $orders, 'cancelled' ), 10, 1 );
+		add_action( "woocommerce_order_status_on_hold", array( $orders, 'cancelled' ), 10, 1 );
+		add_action( "woocommerce_order_status_cancelled", array( $orders, 'cancelled' ), 10, 1 );
+		
+		/*
+		// For Subscription(s) - TODO: Update function to call
+		add_action("woocommerce_subscription_status_cancelled", "pmprowoo_cancelled_subscription", 10);
+		add_action("woocommerce_subscription_status_trash", "pmprowoo_cancelled_subscription", 10);
+		add_action("woocommerce_subscription_status_expired", "pmprowoo_cancelled_subscription", 10);
+		add_action("woocommerce_subscription_status_on-hold", "pmprowoo_cancelled_subscription", 10);
+		add_action("woocommerce_scheduled_subscription_end_of_prepaid_term", "pmprowoo_cancelled_subscription", 10);
+		*/
+		
+		add_filter( 'e20r-license-server-txn-id', array( $orders, 'getTransactionId' ), 10, 5 );
 		add_filter( 'e20r-license-server-billing-info', array( $orders, 'getBillingInfo' ), 10, 3 );
 		add_filter( 'e20r-licensing-server-expiration-date', array( $orders, 'expires' ), 10, 3 );
 		add_filter( 'e20r-licensing-server-client-key', array( $orders, 'create' ), 10, 4 );
