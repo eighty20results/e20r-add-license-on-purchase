@@ -101,6 +101,64 @@ class Orders {
 	}
 	
 	/**
+	 * Create/Add license for the product(s) when order payment plan is cancelled
+	 *
+	 * @param int $order_id
+	 */
+	public function cancelled( $order_id ) {
+		
+		$utils = Utilities::get_instance();
+		
+		global $e20rlm_order;
+		
+		$controller    = Controller::getInstance();
+		$wc_controller = WooCommerce::getInstance();
+		
+		$order   = wc_get_order( $order_id );
+		$user_id = $order->get_user_id();
+		$o_items = $order->get_items();
+		
+		// Cache order for filters/hooks
+		$e20rlm_order = $order;
+		$product_id   = null;
+		
+		$licenses = get_user_meta( $user_id, "e20r_license_user_settings", true );
+		
+		if ( empty( $licenses ) ) {
+			$licenses = array();
+		}
+		
+		foreach ( $o_items as $item => $config ) {
+			
+			$product_id = $config['product_id'];
+			$product    = new \WC_Product( $product_id );
+			
+			$utils->log( "Processing product {$product_id} for {$order_id}" );
+			
+			if ( $wc_controller->isLicdProduct( $product_id ) && $product->is_downloadable() ) {
+				
+				$utils->log( "{$product_id} is a licensed product" );
+				
+				$quantity = absint( $config['qty'] );
+				
+				$utils->log( "Attempting to remove the license for {$product_id}/{$user_id}" );
+				
+				$user_settings = $controller->removeLicense( $product_id, $user_id, 'woocommerce', $quantity );
+				
+				if ( false !== $user_settings ) {
+					$licenses[] = $user_settings;
+				}
+			}
+		}
+		
+		$utils->log( "Saving " . count( $licenses ) . " new licenses for {$user_id}" );
+		
+		update_user_meta( $user_id, "e20r_license_user_settings", $licenses );
+		
+		$this->addOrderNote( $order_id, $licenses, $product_id );
+	}
+	
+	/**
 	 * Add an Order Note containing license information for the specified Order ID
 	 *
 	 * @param int   $order_id
@@ -196,12 +254,16 @@ class Orders {
 	 * Return the transaction ID for the license (is purchase plugin dependent)
 	 *
 	 * @param string                 $txn_id
+	 * @param int                    $product_id
+	 * @param int                    $user_id
 	 * @param string                 $source - PMPro or WooCommerce
 	 * @param \MemberOrder|\WC_Order $order  The order object for PMPro or WooCommerce
 	 *
 	 * @return null
 	 */
-	public function getTransactionId( $txn_id, $source, $order = null ) {
+	public function getTransactionId( $txn_id, $product_id, $user_id, $source, $order = null ) {
+		
+		$utils = Utilities::get_instance();
 		
 		if ( is_null( $order ) ) {
 			global $e20rlm_order;
