@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2017-2018 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -59,7 +59,7 @@ class PMPro {
 		add_action( 'pmpro_after_change_membership_level', array( $this, 'levelChanged' ), 10, 3 );
 		add_action( 'pmpro_membership_level_after_other_settings', array( $this, 'licenseSettings', ), 10, 1 );
 		
-		add_filter( 'e20r-license-server-txn-id', array( $this, 'getTransactionId' ), 10, 3 );
+		add_filter( 'e20r-license-server-txn-id', array( $this, 'getTransactionId' ), 10, 5 );
 		add_filter( 'e20r-license-server-billing-info', array( $this, 'getBillingInfo' ), 10, 3 );
 		add_filter( 'e20r-licensing-server-expiration-date', array( $this, 'expires' ), 10, 3 );
 		add_filter( 'e20r-licensing-server-client-key', array( $this, 'createLicenseKey' ), 10, 4 );
@@ -333,7 +333,7 @@ class PMPro {
 	 *
 	 * @return null
 	 */
-	public function getTransactionId( $txn_id, $source, $order = null ) {
+	public function getTransactionId( $txn_id, $product_id, $user_id, $source, $order = null ) {
 		
 		if ( 'pmpro' != $source ) {
 			return null;
