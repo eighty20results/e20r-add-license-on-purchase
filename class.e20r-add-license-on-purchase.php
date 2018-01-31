@@ -68,17 +68,59 @@ class Controller {
 	}
 	
 	/**
-	 * The current instance of the Controller class
+	 * Class auto-loader for the Add License on Purchase plugin
 	 *
-	 * @return Controller|null
+	 * @param string $class_name Name of the class to auto-load
+	 *
+	 * @since  1.0
+	 * @access public static
 	 */
-	public static function getInstance() {
+	public static function autoLoader( $class_name ) {
 		
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self;
+		if ( false === stripos( $class_name, 'e20r' ) ) {
+			return;
 		}
 		
-		return self::$instance;
+		$parts     = explode( '\\', $class_name );
+		$c_name    = strtolower( preg_replace( '/_/', '-', $parts[ ( count( $parts ) - 1 ) ] ) );
+		$base_path = plugin_dir_path( __FILE__ ) . 'classes/';
+		
+		if ( file_exists( plugin_dir_path( __FILE__ ) . 'class/' ) ) {
+			$base_path = plugin_dir_path( __FILE__ ) . 'class/';
+		}
+		
+		$filename = "class.{$c_name}.php";
+		$iterator = new \RecursiveDirectoryIterator( $base_path, \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveIteratorIterator::SELF_FIRST | \RecursiveIteratorIterator::CATCH_GET_CHILD | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS );
+		
+		/**
+		 * Loate class member files, recursively
+		 */
+		$filter = new \RecursiveCallbackFilterIterator( $iterator, function ( $current, $key, $iterator ) use ( $filename ) {
+			
+			$file_name = $current->getFilename();
+			
+			// Skip hidden files and directories.
+			if ( $file_name[0] == '.' || $file_name == '..' ) {
+				return false;
+			}
+			
+			if ( $current->isDir() ) {
+				// Only recurse into intended subdirectories.
+				return $file_name() === $filename;
+			} else {
+				// Only consume files of interest.
+				return strpos( $file_name, $filename ) === 0;
+			}
+		} );
+		
+		foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
+			
+			$class_path = $f_file->getPath() . "/" . $f_file->getFilename();
+			
+			if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
+				require_once( $class_path );
+			}
+		}
 	}
 	
 	/**
@@ -166,155 +208,6 @@ class Controller {
 		}
 		
 		return $retval;
-	}
-	
-	/**
-	 * Class auto-loader for the Add License on Purchase plugin
-	 *
-	 * @param string $class_name Name of the class to auto-load
-	 *
-	 * @since  1.0
-	 * @access public static
-	 */
-	public static function autoLoader( $class_name ) {
-		
-		if ( false === stripos( $class_name, 'e20r' ) ) {
-			return;
-		}
-		
-		$parts     = explode( '\\', $class_name );
-		$c_name    = strtolower( preg_replace( '/_/', '-', $parts[ ( count( $parts ) - 1 ) ] ) );
-		$base_path = plugin_dir_path( __FILE__ ) . 'classes/';
-		
-		if ( file_exists( plugin_dir_path( __FILE__ ) . 'class/' ) ) {
-			$base_path = plugin_dir_path( __FILE__ ) . 'class/';
-		}
-		
-		$filename = "class.{$c_name}.php";
-		$iterator = new \RecursiveDirectoryIterator( $base_path, \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveIteratorIterator::SELF_FIRST | \RecursiveIteratorIterator::CATCH_GET_CHILD | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS );
-		
-		/**
-		 * Loate class member files, recursively
-		 */
-		$filter = new \RecursiveCallbackFilterIterator( $iterator, function ( $current, $key, $iterator ) use ( $filename ) {
-			
-			$file_name = $current->getFilename();
-			
-			// Skip hidden files and directories.
-			if ( $file_name[0] == '.' || $file_name == '..' ) {
-				return false;
-			}
-			
-			if ( $current->isDir() ) {
-				// Only recurse into intended subdirectories.
-				return $file_name() === $filename;
-			} else {
-				// Only consume files of interest.
-				return strpos( $file_name, $filename ) === 0;
-			}
-		} );
-		
-		foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
-			
-			$class_path = $f_file->getPath() . "/" . $f_file->getFilename();
-			
-			if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
-				require_once( $class_path );
-			}
-		}
-	}
-	
-	/**
-	 * Update the License server with the required license info
-	 *
-	 * @param $action
-	 * @param $settings
-	 *
-	 * @return bool
-	 */
-	public function contactServer( $action, $settings ) {
-		
-		$utils = Utilities::get_instance();
-		
-		/*
-		if ( ! $this->checkPrereqs() ) {
-			return false;
-		}
-		*/
-		
-		$api_params = array(
-			'slm_action'        => $action,
-			'license_key'       => $settings['license_key'],
-			'secret_key'        => ( $action !== 'slm_create_new' ? E20R_LICENSE_SECRET_VERIFY_KEY : E20R_LICENSE_SECRET_CREATE_KEY ),
-			'registered_domain' => ! empty( $settings['registered_domain'] ) ? $settings['registered_domain'] : null,
-		);
-		
-		switch ( $action ) {
-			
-			case 'slm_create_new':
-				$api_params['item_reference']      = ! empty( $settings['item_reference'] ) ? urlencode( $settings['item_reference'] ) : null;
-				$api_params['first_name']          = ! empty( $settings['first_name'] ) ? $settings['first_name'] : null;
-				$api_params['last_name']           = ! empty( $settings['last_name'] ) ? $settings['last_name'] : null;
-				$api_params['email']               = ! empty( $settings['email'] ) ? $settings['email'] : null;
-				$api_params['company_name']        = ! empty( $settings['company'] ) ? $settings['company'] : null;
-				$api_params['txn_id']              = ! empty( $settings['txn_id'] ) ? $settings['txn_id'] : null;
-				$api_params['max_allowed_domains'] = ! empty( $settings['max_allowed_domains'] ) ? $settings['max_allowed_domains'] : null;
-				$api_params['date_created']        = ! empty( $settings['date_created'] ) ? $settings['date_created'] : null;
-				$api_params['date_expiry']         = ! empty( $settings['date_expiry'] ) ? $settings['date_expiry'] : null;
-				break;
-			
-			case 'slm_activate':
-				$api_params['item_reference'] = ! empty( $settings['item_reference'] ) ? urlencode( $settings['item_reference'] ) : null;
-				break;
-			
-			case 'slm_deactivate':
-				// All required settings are already present
-				break;
-		}
-		
-		if ( ! empty( $api_params ) ) {
-			
-			$server_url = add_query_arg( $api_params, E20R_LICENSE_SERVER_URL );
-			$utils->log( "Transmitting for action {$action}...: " );
-			$utils->log( "Sending to: {$server_url}" );
-			
-			// Send query to the license manager server
-			$response = wp_remote_get(
-				$server_url,
-				array(
-					'timeout'     => apply_filters( 'e20r-license-server-timeout', 60 ),
-					'sslverify'   => true,
-					'httpversion' => '1.1',
-				)
-			);
-			
-			$code = wp_remote_retrieve_response_code( $response );
-			
-			// Check for error in the response
-			if ( 200 > $code || 399 < $code ) {
-				
-				$body = $utils->decode_response( wp_remote_retrieve_body( $response ) );
-				$utils->log( "Remote license server error {$code}: " . print_r( $body, true ) );
-				
-				return false;
-			} else {
-				
-				$server = $utils->decode_response( wp_remote_retrieve_body( $response ) );
-				$utils->log( "Server response: " . print_r( $server, true ) );
-				
-				if ( 'success' !== $server->result ) {
-					
-					$utils->add_message( $server->message, 'error', 'backend' );
-					$utils->log( "{$server->message}" );
-					
-					return false;
-				}
-			}
-			
-			return true;
-		}
-		
-		return false;
 	}
 	
 	/**
@@ -436,8 +329,115 @@ class Controller {
 	}
 	
 	/**
-     * Remove License from license server
-     *
+	 * The current instance of the Controller class
+	 *
+	 * @return Controller|null
+	 */
+	public static function getInstance() {
+		
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self;
+		}
+		
+		return self::$instance;
+	}
+	
+	/**
+	 * Update the License server with the required license info
+	 *
+	 * @param $action
+	 * @param $settings
+	 *
+	 * @return bool
+	 */
+	public function contactServer( $action, $settings ) {
+		
+		$utils = Utilities::get_instance();
+		
+		/*
+		if ( ! $this->checkPrereqs() ) {
+			return false;
+		}
+		*/
+		
+		$api_params = array(
+			'slm_action'        => $action,
+			'license_key'       => $settings['license_key'],
+			'secret_key'        => ( $action !== 'slm_create_new' ? E20R_LICENSE_SECRET_VERIFY_KEY : E20R_LICENSE_SECRET_CREATE_KEY ),
+			'registered_domain' => ! empty( $settings['registered_domain'] ) ? $settings['registered_domain'] : null,
+		);
+		
+		switch ( $action ) {
+			
+			case 'slm_create_new':
+				$api_params['item_reference']      = ! empty( $settings['item_reference'] ) ? urlencode( $settings['item_reference'] ) : null;
+				$api_params['first_name']          = ! empty( $settings['first_name'] ) ? $settings['first_name'] : null;
+				$api_params['last_name']           = ! empty( $settings['last_name'] ) ? $settings['last_name'] : null;
+				$api_params['email']               = ! empty( $settings['email'] ) ? $settings['email'] : null;
+				$api_params['company_name']        = ! empty( $settings['company'] ) ? $settings['company'] : null;
+				$api_params['txn_id']              = ! empty( $settings['txn_id'] ) ? $settings['txn_id'] : null;
+				$api_params['max_allowed_domains'] = ! empty( $settings['max_allowed_domains'] ) ? $settings['max_allowed_domains'] : null;
+				$api_params['date_created']        = ! empty( $settings['date_created'] ) ? $settings['date_created'] : null;
+				$api_params['date_expiry']         = ! empty( $settings['date_expiry'] ) ? $settings['date_expiry'] : null;
+				break;
+			
+			case 'slm_activate':
+				$api_params['item_reference'] = ! empty( $settings['item_reference'] ) ? urlencode( $settings['item_reference'] ) : null;
+				break;
+			
+			case 'slm_deactivate':
+				// All required settings are already present
+				break;
+		}
+		
+		if ( ! empty( $api_params ) ) {
+			
+			$server_url = add_query_arg( $api_params, E20R_LICENSE_SERVER_URL );
+			$utils->log( "Transmitting for action {$action}...: " );
+			$utils->log( "Sending to: {$server_url}" );
+			
+			// Send query to the license manager server
+			$response = wp_remote_get(
+				$server_url,
+				array(
+					'timeout'     => apply_filters( 'e20r-license-server-timeout', 60 ),
+					'sslverify'   => true,
+					'httpversion' => '1.1',
+				)
+			);
+			
+			$code = wp_remote_retrieve_response_code( $response );
+			
+			// Check for error in the response
+			if ( 200 > $code || 399 < $code ) {
+				
+				$body = $utils->decode_response( wp_remote_retrieve_body( $response ) );
+				$utils->log( "Remote license server error {$code}: " . print_r( $body, true ) );
+				
+				return false;
+			} else {
+				
+				$server = $utils->decode_response( wp_remote_retrieve_body( $response ) );
+				$utils->log( "Server response: " . print_r( $server, true ) );
+				
+				if ( 'success' !== $server->result ) {
+					
+					$utils->add_message( $server->message, 'error', 'backend' );
+					$utils->log( "{$server->message}" );
+					
+					return false;
+				}
+			}
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Remove License from license server
+	 *
 	 * @param  int $id     - Order or level ID
 	 * @param  int $user_id
 	 * @param  int $source - PMPro or WooCommerce transaction
@@ -546,6 +546,54 @@ class Controller {
 	}
 	
 	/**
+	 * Get the license information saved for the user ID
+	 *
+	 * @param int $user_id
+	 *
+	 * @return array
+	 */
+	public function getUserLicenses( $user_id ) {
+		
+		$licenses = get_user_meta( $user_id, 'e20r_license_user_settings', true );
+		$updated  = false;
+		
+		// No licenses saved/available
+		if ( empty( $licenses ) ) {
+			$licenses = array();
+		}
+		
+		foreach ( $licenses as $l_key => $license ) {
+			
+			foreach ( $license as $license_id => $detail ) {
+				
+				// If there's no key defined, there's no license!
+				if ( empty( $detail['license_key'] ) ) {
+					unset( $licenses[ $l_key ] );
+				}
+			}
+			
+			if ( true === $updated ) {
+				update_user_meta( $user_id, 'e20r_license_user_settings', $licenses );
+			}
+		}
+		
+		return $licenses;
+	}
+	
+	/**
+     * Save user's license information to the wp_usermeta table
+     *
+	 * @param array $licenses
+	 * @param int $user_id
+	 *
+	 * @return bool|int
+	 */
+	public function saveUserLicenses( $licenses, $user_id ) {
+		
+		return update_user_meta( $user_id, "e20r_license_user_settings", $licenses );
+    }
+    
+	/**
 	 * Return HTML table with License Information
 	 *
 	 * @param array $licenses
@@ -570,6 +618,7 @@ class Controller {
 		foreach ( $licenses as $key => $license_info ) {
 			
 			foreach ( $license_info as $id => $detail ) {
+				
 				$utils->log( "Processing license for product {$id}: " . print_r( $detail, true ) );
 				
 				$content .= sprintf( '  <tr>' );
@@ -621,7 +670,7 @@ class Controller {
 			return null;
 		}
 		
-		$license_config = get_user_meta( $current_user->ID, "e20r_license_user_settings", true );
+		$license_config = $this->getUserLicenses( $current_user->ID );
 		
 		// No license settings saved for this user.
 		if ( empty( $license_config ) ) {
