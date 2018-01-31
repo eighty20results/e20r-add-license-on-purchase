@@ -64,7 +64,7 @@ class Orders {
 		$e20rlm_order = $order;
 		$product_id   = null;
 		
-		$licenses = get_user_meta( $user_id, "e20r_license_user_settings", true );
+		$licenses = $controller->getUserLicenses( $user_id );
 		
 		if ( empty( $licenses ) ) {
 			$licenses = array();
@@ -95,8 +95,7 @@ class Orders {
 		
 		$utils->log( "Saving " . count( $licenses ) . " new licenses for {$user_id}" );
 		
-		update_user_meta( $user_id, "e20r_license_user_settings", $licenses );
-		
+		$controller->saveUserLicenses( $licenses, $user_id );
 		$this->addOrderNote( $order_id, $licenses, $product_id );
 	}
 	
@@ -122,7 +121,7 @@ class Orders {
 		$e20rlm_order = $order;
 		$product_id   = null;
 		
-		$licenses = get_user_meta( $user_id, "e20r_license_user_settings", true );
+		$licenses = $controller->getUserLicenses( $user_id );
 		
 		if ( empty( $licenses ) ) {
 			$licenses = array();
@@ -153,8 +152,7 @@ class Orders {
 		
 		$utils->log( "Saving " . count( $licenses ) . " new licenses for {$user_id}" );
 		
-		update_user_meta( $user_id, "e20r_license_user_settings", $licenses );
-		
+		$controller->saveUserLicenses( $licenses, $user_id );
 		$this->addOrderNote( $order_id, $licenses, $product_id );
 	}
 	
@@ -194,7 +192,7 @@ class Orders {
 		$order_id = $order->get_id();
 		$user_id  = $order->get_user_id();
 		
-		$licenses = get_user_meta( $user_id, 'e20r_license_user_settings', true );
+		$licenses = $controller->getUserLicenses( $user_id );
 		
 		if ( ! empty( $licenses ) && is_array( $licenses ) ) {
 			$content = $controller->licenseInfo( $licenses );

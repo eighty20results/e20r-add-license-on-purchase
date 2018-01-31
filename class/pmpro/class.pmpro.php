@@ -78,6 +78,7 @@ class PMPro {
 	public function levelChanged( $level_id, $user_id, $cancel_level ) {
 		
 		$utils = Utilities::get_instance();
+		$controller = Controller::getInstance();
 		
 		global $pmpro_checkout_levels;
 		
@@ -103,9 +104,10 @@ class PMPro {
 			$this->checkout( $user_id, $order, $level_id );
 		}
 		
-		// TODO: Handle membership cancellations
+		
 		if ( $level_id === 0 && $cancel_level > 0 ) {
-			$license_config = get_user_meta( $user_id, '', true );
+			$utils->log("Remove license for level ID {$level_id} and user {$user_id}");
+			$controller->removeLicense( $level_id, $user_id, 'pmpro', 1 );
 		}
 	}
 	
@@ -220,7 +222,7 @@ class PMPro {
 		$utils        = Utilities::get_instance();
 		$controller   = Controller::getInstance();
 		
-		$licenses = get_user_meta( $user_id, "e20r_license_user_settings", true );
+		$licenses = $controller->getUserLicenses( $user_id );
 		
 		if ( empty( $licenses ) ) {
 			$licenses = array();
