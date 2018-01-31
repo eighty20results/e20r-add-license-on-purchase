@@ -1,9 +1,9 @@
 === Eighty/20 Results - Sell Licenses with WooCommerce and Paid Memberships Pro ===
 Contributors: eighty20results
-Tags: customizations, memberships, paid memberships pro, license management, woocommerce, sell licenses, pmpro, mmpu, software license manager
+Tags: software license, paid memberships pro, woocommerce, sell licenses, pmpro, mmpu, software license manager
 Requires at least: 4.7
-Tested up to: 4.8.1
-Stable tag: 1.1
+Tested up to: 4.9.2
+Stable tag: 2.0
 
 Sell Software License Manager licenses from WooCommerce or Paid Memberships Pro. Includes support for the Multiple Memberships Per User PMPro add-on.
 
@@ -19,15 +19,15 @@ This plugin requires that your sales process uses either the Paid Memberships Pr
 
 If your licenses are recurring (i.e. have something other than 0 as it's "License renewal period", you need a payment gateway/membership level configuration that supports recurring payment plans!
 
-We use the "WooCommerce Stripe Subscription Payment Gateway" plugin by Wsspg for WooCommerce (not an endorsement, just an example of what we use right now).
+We have added support for the "WooCommerce Subscriptions" premium plugin (not an endorsement).
 For Paid Memberships Pro we configure the license settings as part of an annual recurring membership level.
 
 NOTE: This plugin will simplify selling license keys from your WooCommerce Shop, or as part of a Paid Memberships Pro membership level. It does *not* include a kit to check licenses from a plugin. To do that, you would need something like our E20R Licensing Client Toolkit (for sale), or you can create your own.
 
 == Missing features ==
 
-* Renewal option for a license from the [e20r_user_licenses] short code
-* Manual renewal on checkout page
+* Renewal option for a license from the [e20r_user_licenses] short code (depercated w/support for Recurring billing)
+* Manual renewal on checkout page (deprectated w/support for recurring billing)
 
 == Installation ==
 
@@ -36,6 +36,22 @@ NOTE: This plugin will simplify selling license keys from your WooCommerce Shop,
 1. Configure the License Manager connection using either the WooCommerce "Settings" -> "Products" -> "Software Licenses" tab, or the Paid Memberships Pro "Memberships" -> "Software Licenses" Settings page. You will need to supply the Create License secret key, and the Verify License Secret key, plus the URL to the server where the Software License Manager server software is running (even if that is the same server as you're using for WooCommerce or PMPro).
 
 == Changelog ==
+
+== v2.0 ==
+
+* ENHANCEMENT: Added getUserLicenses() controller method to fetch licenses for user
+* ENHANCEMENT: Added saveUserLicenses() controller method to save license info for user
+* ENHANCEMENT: Use getUserLicenses() method in Controller class
+* ENHANCEMENT: Refactored Controller class
+* ENHANCEMENT: Update utilities submodule to v2.0
+* ENHANCEMENT: Add support for subscription (recurring) payment licenses for WooCommerce
+* ENHANCEMENT: Added new autoloader function (more robust and flexible)
+* ENHANCEMENT: Add 'removeLicense()' method to support cancellation of subscription based licenses
+* ENHANCEMENT: Improved PHPDoc block for the addLicense() method
+* ENHANCEMENT: Use controller method getUserLicenses() when generating email order content
+* ENHANCEMENT: Use getUserLicenses() controller method to fetch license info for user
+* ENHANCEMENT: Use saveUserLicenses() controller method to save license info for user
+* BUG FIX: Didn't verify the product being processed had the required licensing information configured
 
 == v1.1 ==
 
