@@ -51,14 +51,15 @@ class Subscriptions {
 	 */
 	public function activate( $subscription ) {
 		
-		$utils       = Utilities::get_instance();
-		$items       = $subscription->get_items();
-		$sub_user_id = $subscription->get_user_id();
-		$controller  = Controller::getInstance();
+		$utils         = Utilities::get_instance();
+		$items         = $subscription->get_items();
+		$sub_user_id   = $subscription->get_user_id();
+		$controller    = Controller::getInstance();
+		$wc_controller = WooCommerce::getInstance();
 		
 		if ( ! empty( $items ) && ! empty( $sub_user_id ) ) {
 			
-			$utils->log("Found " . count($items ) . " order items in subscription for {$sub_user_id}");
+			$utils->log( "Found " . count( $items ) . " order items in subscription for {$sub_user_id}" );
 			
 			/**
 			 * @var \WC_Order_Item $order_item
@@ -67,9 +68,11 @@ class Subscriptions {
 				
 				$order = $this->getOrderFromSub( $subscription );
 				
-				if ( ! empty( $order ) ) {
+				if ( ! empty( $order ) && $wc_controller->isLicdProduct( wcs_get_canonical_product_id( $order_item ) ) ) {
+					
 					$quantity = $this->getOrderItemQty( $order_item, $order );
-					$utils->log("Adding {$quantity} licenses for {$sub_user_id} and product: " . $order_item->get_id() );
+					
+					$utils->log( "Adding {$quantity} licenses for {$sub_user_id} and product: " . $order_item->get_id() );
 					$controller->addLicense( $order_item->get_id(), $sub_user_id, 'woocommerce', $quantity );
 				}
 			}
@@ -124,14 +127,15 @@ class Subscriptions {
 	 */
 	public function cancel( $subscription ) {
 		
-		$utils       = Utilities::get_instance();
-		$items       = $subscription->get_items();
-		$sub_user_id = $subscription->get_user_id();
-		$controller  = Controller::getInstance();
+		$utils         = Utilities::get_instance();
+		$items         = $subscription->get_items();
+		$sub_user_id   = $subscription->get_user_id();
+		$controller    = Controller::getInstance();
+		$wc_controller = WooCommerce::getInstance();
 		
 		if ( ! empty( $items ) && ! empty( $sub_user_id ) ) {
 			
-			$utils->log("Found " . count($items ) . " order items in subscription we've cancelled for {$sub_user_id}");
+			$utils->log( "Found " . count( $items ) . " order items in subscription we've cancelled for {$sub_user_id}" );
 			
 			/**
 			 * @var \WC_Order_Item $order_item
@@ -140,9 +144,11 @@ class Subscriptions {
 				
 				$order = $this->getOrderFromSub( $subscription );
 				
-				if ( ! empty( $order ) ) {
+				if ( ! empty( $order ) && $wc_controller->isLicdProduct( wcs_get_canonical_product_id( $order_item ) ) ) {
+					
 					$quantity = $this->getOrderItemQty( $order_item, $order );
-					$utils->log("Cancelling {$quantity} licenses for {$sub_user_id} and product: " . $order_item->get_id() );
+					
+					$utils->log( "Cancelling {$quantity} licenses for {$sub_user_id} and product: " . $order_item->get_id() );
 					$controller->removeLicense( $order_item->get_id(), $sub_user_id, 'woocommerce', $quantity );
 				}
 			}
