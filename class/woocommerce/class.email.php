@@ -72,10 +72,11 @@ class EMail {
 			return;
 		}
 		
-		$licenses = get_user_meta( $user_id, 'e20r_license_user_settings', true );
+		$licenses = $controller->getUserLicenses( $user_id );
 		
 		$utils->log( "License info: " . print_r( $licenses, true ));
 		if ( ! empty( $licenses ) && is_array( $licenses ) ) {
+			
 			$content = $controller->licenseInfo( $licenses );
 		}
 		
