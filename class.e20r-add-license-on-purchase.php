@@ -3,7 +3,7 @@
 Plugin Name: E20R Add license on purchase
 Plugin URI: https://eighty20results.com/wordpress-plugins/e20r-add-license-for-level/
 Description: Sell software licenses from WooCommerce or Paid Memberships Pro
-Version: 1.1
+Version: 2.0
 Author: Eighty / 20 results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: http://www.eighty20results.com/thomas-sjolshagen/
 Developer: Thomas Sjolshagen <thomas@eighty20results.com>
@@ -40,7 +40,7 @@ use E20R\Utilities\Utilities;
 defined( 'ABSPATH' ) or die( 'Cannot access plugin sources directly' );
 
 if ( ! defined( 'E20R_LICENSE_SERVER_VERSION' ) ) {
-	define( 'E20R_LICENSE_SERVER_VERSION', '1.1' );
+	define( 'E20R_LICENSE_SERVER_VERSION', '2.0' );
 }
 
 if ( ! defined( 'E20R_ALOP_URL' ) ) {
@@ -169,6 +169,62 @@ class Controller {
 	}
 	
 	/**
+	 * Class auto-loader for the Add License on Purchase plugin
+	 *
+	 * @param string $class_name Name of the class to auto-load
+	 *
+	 * @since  1.0
+	 * @access public static
+	 */
+	public static function autoLoader( $class_name ) {
+		
+		if ( false === stripos( $class_name, 'e20r' ) ) {
+			return;
+		}
+		
+		$parts     = explode( '\\', $class_name );
+		$c_name    = strtolower( preg_replace( '/_/', '-', $parts[ ( count( $parts ) - 1 ) ] ) );
+		$base_path = plugin_dir_path( __FILE__ ) . 'classes/';
+		
+		if ( file_exists( plugin_dir_path( __FILE__ ) . 'class/' ) ) {
+			$base_path = plugin_dir_path( __FILE__ ) . 'class/';
+		}
+		
+		$filename = "class.{$c_name}.php";
+		$iterator = new \RecursiveDirectoryIterator( $base_path, \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveIteratorIterator::SELF_FIRST | \RecursiveIteratorIterator::CATCH_GET_CHILD | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS );
+		
+		/**
+		 * Loate class member files, recursively
+		 */
+		$filter = new \RecursiveCallbackFilterIterator( $iterator, function ( $current, $key, $iterator ) use ( $filename ) {
+			
+			$file_name = $current->getFilename();
+			
+			// Skip hidden files and directories.
+			if ( $file_name[0] == '.' || $file_name == '..' ) {
+				return false;
+			}
+			
+			if ( $current->isDir() ) {
+				// Only recurse into intended subdirectories.
+				return $file_name() === $filename;
+			} else {
+				// Only consume files of interest.
+				return strpos( $file_name, $filename ) === 0;
+			}
+		} );
+		
+		foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
+			
+			$class_path = $f_file->getPath() . "/" . $f_file->getFilename();
+			
+			if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
+				require_once( $class_path );
+			}
+		}
+	}
+	
+	/**
 	 * Update the License server with the required license info
 	 *
 	 * @param $action
@@ -262,73 +318,12 @@ class Controller {
 	}
 	
 	/**
-	 * Display purchased license(s) for a given user account
-	 *
-	 * @param array $attrs
-	 *
-	 * @return null|string
-	 */
-	public function licenseShortcode( $attrs = array() ) {
-		
-		$utils = Utilities::get_instance();
-		
-		global $current_user;
-		
-		if ( ! is_user_logged_in() ) {
-			return null;
-		}
-		
-		$license_config = get_user_meta( $current_user->ID, "e20r_license_user_settings", true );
-		
-		// No license settings saved for this user.
-		if ( empty( $license_config ) ) {
-			return null;
-		}
-		
-		ob_start(); ?>
-        <h2><?php __( "Active Licenses", "e20r-add-license-on-purchase" ) ?></h2>
-        <div class="e20r-license-list">
-            <table class="e20r-license-list">
-                <thead>
-                <tr class="e20r-license-thead">
-                    <th><?php _e( "License Name", "e20r-add-license-on-purchase" ); ?></th>
-                    <th><?php _e( "License Key", "e20r-add-license-on-purchase" ); ?></th>
-                    <th><?php _e( "Expires", "e20r-add-license-on-purchase" ); ?></th>
-                    <th><?php _e( "License Email", "e20r-add-license-on-purchase" ); ?></th>
-                </tr>
-                </thead>
-                <tbody>
-				<?php
-				foreach ( $license_config as $key => $order ) {
-					foreach ( $order as $product_id => $settings ) {
-						if ( ! empty( $settings['license_key'] ) ) {
-							?>
-                            <tr class="e20r-license-row">
-                                <td class="e20r-license-name"><?php echo isset( $settings['item_reference'] ) ? esc_attr( $settings['item_reference'] ) : null; ?></td>
-                                <td class="e20r-license-key"><?php echo isset( $settings['license_key'] ) ? esc_attr( $settings['license_key'] ) : null; ?></td>
-                                <td class="e20r-license-expiry"><?php echo isset( $settings['date_expiry'] ) ? esc_attr( $settings['date_expiry'] ) : null; ?></td>
-                                <td class="e20r-license-email"><?php echo isset( $settings['email'] ) ? esc_attr( urldecode( $settings['email'] ) ) : null; ?></td>
-                            </tr>
-							<?php
-						}
-					}
-				} ?>
-                </tbody>
-            </table>
-        </div>
-		<?php
-		$html = ob_get_clean();
-		
-		return $html;
-	}
-	
-	/**
 	 * Add the license for the specified user_id to the license server.
 	 *
-	 * @param int    $user_id
-	 * @param string $source
-	 * @param int    $id
-	 * @param int    $quantity
+	 * @param int    $id       The ID of the product or level, etc
+	 * @param int    $user_id  The user's ID
+	 * @param string $source   The source of the call (one of the supported sales modules)
+	 * @param int    $quantity Number of products sold (i.e. the multiplier)
 	 *
 	 * @return bool|array
 	 */
@@ -369,7 +364,7 @@ class Controller {
 		$action = 'slm_create_new';
 		
 		$user_meta       = apply_filters( 'e20r-license-server-billing-info', array(), $user, $source );
-		$txn_id          = apply_filters( 'e20r-license-server-txn-id', null, $source );
+		$txn_id          = apply_filters( 'e20r-license-server-txn-id', null, $id, $user->ID, $source );
 		$date_expiry     = apply_filters( 'e20r-licensing-server-expiration-date', null, $id, $source );
 		$random          = $utils->random_string( 8, '01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ' );
 		$license_key     = apply_filters( 'e20r-licensing-server-client-key', "e20r_dl_{$random}", $id, $source, $random );
@@ -413,6 +408,116 @@ class Controller {
 			$utils->log( "Initial license created on remote server" );
 			
 			$action   = 'slm_activate';
+			$settings = array(
+				'license_key'       => $license_key,
+				'registered_domain' => 'mytest.example.com',
+				'item_reference'    => urlencode( $user_settings[ $id ]['item_reference'] ),
+			);
+			
+			// Activate the license (to set the Level info)
+			if ( true === $controller->contactServer( $action, $settings ) ) {
+				
+				// Deactivate the license (to pending) so the user can load it manually later.
+				$action   = 'slm_deactivate';
+				$settings = array(
+					'license_key'       => $license_key,
+					'registered_domain' => 'mytest.example.com',
+				);
+				
+				// Deactivate license so the server where the product is installed can connect & activate us
+				if ( true === $controller->contactServer( $action, $settings ) ) {
+					
+					return $user_settings;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+     * Remove License from license server
+     *
+	 * @param  int $id     - Order or level ID
+	 * @param  int $user_id
+	 * @param  int $source - PMPro or WooCommerce transaction
+	 * @param int  $quantity
+	 *
+	 * @return array|bool
+	 */
+	public function removeLicense( $id, $user_id, $source, $quantity = 1 ) {
+		
+		$controller = Controller::getInstance();
+		$utils      = Utilities::get_instance();
+		
+		$lm_url        = E20R_LICENSE_SERVER_URL;
+		$lm_key        = E20R_LICENSE_SECRET_CREATE_KEY;
+		$user_settings = array();
+		$txn_id        = null;
+		
+		if ( empty( $lm_url ) || empty( $lm_key ) ) {
+			
+			$utils->log( "Missing server URL or key loaded" );
+			$settings_url = add_query_arg(
+				array(
+					'page'    => 'wc-settings',
+					'tab'     => 'products',
+					'section' => 'e20rlm',
+				),
+				admin_url( 'admin.php' )
+			);
+			
+			$utils->add_message(
+				sprintf(
+					__( 'Missing Server URL or secure key! Please %1$supdate your settings%2$s.', 'e20r-add-license-on-purchase' ),
+					sprintf( '<a href="%s">', $settings_url ),
+					'</a>' ),
+				'error',
+				'backend'
+			);
+		}
+		
+		$utils->log( "Deactivating license for {$id}/{$user_id}/{$source}" );
+		
+		$user   = get_userdata( $user_id );
+		$action = 'slm_deactivate';
+		
+		$user_meta   = apply_filters( 'e20r-license-server-billing-info', array(), $user, $source );
+		$txn_id      = apply_filters( 'e20r-license-server-txn-id', $txn_id, $id, $user->ID, $source );
+		$date_expiry = apply_filters( 'e20r-licensing-server-expiration-date', null, $id, $source );
+		$random      = $utils->random_string( 8, '01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ' );
+		$license_key = apply_filters( 'e20r-licensing-server-client-key', "e20r_dl_{$random}", $id, $source, $random );
+		
+		$utils->log( "Txn ID: {$txn_id}, Expiry: {$date_expiry}, Key: {$license_key}" );
+		
+		if ( empty( $domains_allowed ) ) {
+			$utils->log( "Unable to determine the number of domains to allow" );
+			
+			return false;
+		}
+		
+		$settings = array(
+			'license_key'       => $license_key,
+			'registered_domain' => 'mytest.example.com',
+			'item_reference'    => urlencode( $user_settings[ $id ]['item_reference'] ),
+		);
+		
+		if ( ! isset( $user_settings[ $id ] ) ) {
+			$user_settings[ $id ] = array();
+		}
+		
+		$user_settings[ $id ]                   = $settings;
+		$user_settings[ $id ]['item_reference'] = apply_filters( 'e20r-license-server-license-name', null, $id, $source );
+		$user_settings[ $id ]['item_reference'] .= " for {$user_meta['email']}";
+		
+		$utils->log( "Action {$action} settings for {$user_id}: " . print_r( $user_settings, true ) );
+		
+		// Add the new license (with a license key).
+		if ( false === $controller->contactServer( $action, $settings ) ) {
+			
+			$utils->log( "Error Deactivating licens on server!" );
+			
+			$action   = 'slm_deactivate';
 			$settings = array(
 				'license_key'       => $license_key,
 				'registered_domain' => 'mytest.example.com',
@@ -500,60 +605,66 @@ class Controller {
 	}
 	
 	/**
-	 * Class auto-loader for the Add License on Purchase plugin
+	 * Display purchased license(s) for a given user account
 	 *
-	 * @param string $class_name Name of the class to auto-load
+	 * @param array $attrs
 	 *
-	 * @since  1.0
-	 * @access public static
+	 * @return null|string
 	 */
-	public static function autoLoader( $class_name ) {
+	public function licenseShortcode( $attrs = array() ) {
 		
-		if ( false === stripos( $class_name, 'e20r' ) ) {
-			return;
+		$utils = Utilities::get_instance();
+		
+		global $current_user;
+		
+		if ( ! is_user_logged_in() ) {
+			return null;
 		}
 		
-		$parts     = explode( '\\', $class_name );
-		$c_name    = strtolower( preg_replace( '/_/', '-', $parts[ ( count( $parts ) - 1 ) ] ) );
-		$base_path = plugin_dir_path( __FILE__ ) . 'classes/';
+		$license_config = get_user_meta( $current_user->ID, "e20r_license_user_settings", true );
 		
-		if ( file_exists( plugin_dir_path( __FILE__ ) . 'class/' ) ) {
-			$base_path = plugin_dir_path( __FILE__ ) . 'class/';
+		// No license settings saved for this user.
+		if ( empty( $license_config ) ) {
+			return null;
 		}
 		
-		$filename = "class.{$c_name}.php";
-		$iterator = new \RecursiveDirectoryIterator( $base_path, \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveIteratorIterator::SELF_FIRST | \RecursiveIteratorIterator::CATCH_GET_CHILD | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS );
+		ob_start(); ?>
+        <h2><?php __( "Active Licenses", "e20r-add-license-on-purchase" ) ?></h2>
+        <div class="e20r-license-list">
+            <table class="e20r-license-list">
+                <thead>
+                <tr class="e20r-license-thead">
+                    <th><?php _e( "License Name", "e20r-add-license-on-purchase" ); ?></th>
+                    <th><?php _e( "License Key", "e20r-add-license-on-purchase" ); ?></th>
+                    <th><?php _e( "Expires", "e20r-add-license-on-purchase" ); ?></th>
+                    <th><?php _e( "License Email", "e20r-add-license-on-purchase" ); ?></th>
+                </tr>
+                </thead>
+                <tbody>
+				<?php
+				foreach ( $license_config as $key => $order ) {
+					foreach ( $order as $product_id => $settings ) {
+						if ( ! empty( $settings['license_key'] ) ) {
+							?>
+                            <tr class="e20r-license-row">
+                                <td class="e20r-license-name"><?php echo isset( $settings['item_reference'] ) ? esc_attr( $settings['item_reference'] ) : null; ?></td>
+                                <td class="e20r-license-key"><?php echo isset( $settings['license_key'] ) ? esc_attr( $settings['license_key'] ) : null; ?></td>
+                                <td class="e20r-license-expiry"><?php echo isset( $settings['date_expiry'] ) ? esc_attr( $settings['date_expiry'] ) : null; ?></td>
+                                <td class="e20r-license-email"><?php echo isset( $settings['email'] ) ? esc_attr( urldecode( $settings['email'] ) ) : null; ?></td>
+                            </tr>
+							<?php
+						}
+					}
+				} ?>
+                </tbody>
+            </table>
+        </div>
+		<?php
+		$html = ob_get_clean();
 		
-		/**
-		 * Loate class member files, recursively
-		 */
-		$filter = new \RecursiveCallbackFilterIterator( $iterator, function ( $current, $key, $iterator ) use ( $filename ) {
-			
-			$file_name = $current->getFilename();
-			
-			// Skip hidden files and directories.
-			if ( $file_name[0] == '.' || $file_name == '..' ) {
-				return false;
-			}
-			
-			if ( $current->isDir() ) {
-				// Only recurse into intended subdirectories.
-				return $file_name() === $filename;
-			} else {
-				// Only consume files of interest.
-				return strpos( $file_name, $filename ) === 0;
-			}
-		} );
-		
-		foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
-			
-			$class_path = $f_file->getPath() . "/" . $f_file->getFilename();
-			
-			if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
-				require_once( $class_path );
-			}
-		}
+		return $html;
 	}
+	
 }
 
 spl_autoload_register( 'E20R\\Licensing\\Purchase\\Controller::autoLoader' );
