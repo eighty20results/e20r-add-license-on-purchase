@@ -50,11 +50,12 @@ class WooCommerce {
 	 */
 	public function loadHooks() {
 		
-		$settings = Settings::getInstance();
-		$orders = Orders::getInstance();
+		$settings    = Settings::getInstance();
+		$orders      = Orders::getInstance();
+		$subsciption = Subscriptions::getInstance();
 		
 		add_action( 'admin_enqueue_scripts', array( $this, 'loadScripts' ), 10 );
-		add_filter( 'e20r-license-server-slm-settings', array( $this, 'addSettings'), 10, 2 );
+		add_filter( 'e20r-license-server-slm-settings', array( $this, 'addSettings' ), 10, 2 );
 		
 		add_filter( 'woocommerce_get_sections_products', array( $settings, 'section' ), 10, 1 );
 		add_filter( 'woocommerce_get_settings_products', array( $settings, 'settings' ), 10, 2 );
@@ -62,30 +63,29 @@ class WooCommerce {
 		add_action( 'woocommerce_product_options_general_product_data', array( $settings, 'fields' ), 10 );
 		add_action( 'woocommerce_process_product_meta', array( $settings, 'save' ), 10 );
 		
-		add_action('woocommerce_email_before_order_table', array( EMail::getInstance(), 'content' ), 10, 4);
+		add_action( 'woocommerce_email_before_order_table', array( EMail::getInstance(), 'content' ), 10, 4 );
 		
-		add_action( 'woocommerce_order_details_after_order_table', array( $orders, 'metadata' ), 10, 1);
-		add_action( 'woocommerce_payment_complete', array( $orders, 'complete') , 10, 1 );
-		add_action( 'woocommerce_payment_complete_order_status_completed', array( $orders, 'complete') , 10, 1 );
+		add_action( 'woocommerce_order_details_after_order_table', array( $orders, 'metadata' ), 10, 1 );
+		add_action( 'woocommerce_payment_complete', array( $orders, 'complete' ), 10, 1 );
+		add_action( 'woocommerce_payment_complete_order_status_completed', array( $orders, 'complete' ), 10, 1 );
 		
-		/*
-		// For Subscription(s) - TODO: Update function to call
-		add_action('woocommerce_subscription_status_active', 'pmprowoo_activated_subscription');
-		add_action('woocommerce_subscription_status_on-hold_to_active', 'pmprowoo_activated_subscription');
-		*/
+		// For Subscription(s)
+		add_action( 'woocommerce_subscription_status_active', array( $subsciption, "activate" ), 10, 1 );
+		add_action( 'woocommerce_subscription_status_on-hold_to_active', array( $subsciption, "activate" ), 10, 1 );
+		
 		add_action( "woocommerce_order_status_refunded", array( $orders, 'cancelled' ), 10, 1 );
 		add_action( "woocommerce_order_status_failed", array( $orders, 'cancelled' ), 10, 1 );
 		add_action( "woocommerce_order_status_on_hold", array( $orders, 'cancelled' ), 10, 1 );
 		add_action( "woocommerce_order_status_cancelled", array( $orders, 'cancelled' ), 10, 1 );
 		
-		/*
-		// For Subscription(s) - TODO: Update function to call
-		add_action("woocommerce_subscription_status_cancelled", "pmprowoo_cancelled_subscription", 10);
-		add_action("woocommerce_subscription_status_trash", "pmprowoo_cancelled_subscription", 10);
-		add_action("woocommerce_subscription_status_expired", "pmprowoo_cancelled_subscription", 10);
-		add_action("woocommerce_subscription_status_on-hold", "pmprowoo_cancelled_subscription", 10);
-		add_action("woocommerce_scheduled_subscription_end_of_prepaid_term", "pmprowoo_cancelled_subscription", 10);
-		*/
+		
+		// For Subscription(s)
+		add_action( "woocommerce_subscription_status_cancelled", array( $subsciption, "cancel" ), 10, 1 );
+		add_action( "woocommerce_subscription_status_trash", array( $subsciption, "cancel" ), 10, 1 );
+		add_action( "woocommerce_subscription_status_expired", array( $subsciption, "cancel" ), 10, 1 );
+		add_action( "woocommerce_subscription_status_on-hold", array( $subsciption, "cancel" ), 10, 1 );
+		add_action( "woocommerce_scheduled_subscription_end_of_prepaid_term", array( $subsciption, "cancel" ), 10, 1 );
+		
 		
 		add_filter( 'e20r-license-server-txn-id', array( $orders, 'getTransactionId' ), 10, 5 );
 		add_filter( 'e20r-license-server-billing-info', array( $orders, 'getBillingInfo' ), 10, 3 );
@@ -109,7 +109,7 @@ class WooCommerce {
 		$settings[] = array(
 			'name' => __( 'Software License Manager Settings', 'e20r-add-license-on-purchase' ),
 			'type' => 'title',
-			'desc' => __('The following options are used to connect to the license manager software/plugin.', 'e20r-add-license-on-purchase' ),
+			'desc' => __( 'The following options are used to connect to the license manager software/plugin.', 'e20r-add-license-on-purchase' ),
 			'id'   => 'wcslider',
 		);
 		
@@ -126,7 +126,7 @@ class WooCommerce {
 		// Secret Key for Creating new license
 		$settings[] = array(
 			'name'     => __( "Create License key", 'e20r-add-license-on-purchase' ),
-			'desc_tip' => __( 'The secret key used to securely connect to the License Manager software, and create a new license', 'e20r-add-license-on-purchase'),
+			'desc_tip' => __( 'The secret key used to securely connect to the License Manager software, and create a new license', 'e20r-add-license-on-purchase' ),
 			'id'       => 'e20rlm_api_create_secret',
 			'type'     => 'password',
 			'css'      => 'min-width: 300px;',
@@ -135,7 +135,7 @@ class WooCommerce {
 		
 		$settings[] = array(
 			'name'     => __( "Verify License key", 'e20r-add-license-on-purchase' ),
-			'desc_tip' => __( 'The secret key used to securely connect to the License Manager software, and verify a license', 'e20r-add-license-on-purchase'),
+			'desc_tip' => __( 'The secret key used to securely connect to the License Manager software, and verify a license', 'e20r-add-license-on-purchase' ),
 			'id'       => 'e20rlm_api_verify_secret',
 			'type'     => 'password',
 			'css'      => 'min-width: 300px;',
@@ -155,7 +155,7 @@ class WooCommerce {
 	 */
 	public function loadScripts() {
 		
-		wp_enqueue_script( 'e20rlm', E20R_ALOP_URL . 'js/e20r-add-license-on-purchase.js', array( 'jquery'), E20R_LICENSE_SERVER_VERSION );
+		wp_enqueue_script( 'e20rlm', E20R_ALOP_URL . 'js/e20r-add-license-on-purchase.js', array( 'jquery' ), E20R_LICENSE_SERVER_VERSION );
 	}
 	
 	/**
