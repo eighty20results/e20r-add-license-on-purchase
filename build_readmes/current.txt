@@ -1,13 +1,4 @@
-ENHANCEMENT: Added getUserLicenses() controller method to fetch licenses for user
-ENHANCEMENT: Added saveUserLicenses() controller method to save license info for user
-ENHANCEMENT: Use getUserLicenses() method in Controller class
-ENHANCEMENT: Refactored Controller class
-ENHANCEMENT: Update utilities submodule to v2.0
-ENHANCEMENT: Add support for subscription (recurring) payment licenses for WooCommerce
-ENHANCEMENT: Added new autoloader function (more robust and flexible)
-ENHANCEMENT: Add 'removeLicense()' method to support cancellation of subscription based licenses
-ENHANCEMENT: Improved PHPDoc block for the addLicense() method
-ENHANCEMENT: Use controller method getUserLicenses() when generating email order content
-ENHANCEMENT: Use getUserLicenses() controller method to fetch license info for user
-ENHANCEMENT: Use saveUserLicenses() controller method to save license info for user
-BUG FIX: Didn't verify the product being processed had the required licensing information configured
+ENHANCEMENT: Updated Utilities module
+BUG FIX: Didn't set the $e20rlm_order global for valid subscription orders when using WooCommerce
+BUG FIX: Fatal error when received $order is empty for WooCommerce
+BUG FIX: Fatal error when received $order is empty for PMPro

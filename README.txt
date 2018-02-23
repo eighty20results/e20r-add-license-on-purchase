@@ -2,8 +2,8 @@
 Contributors: eighty20results
 Tags: software license, paid memberships pro, woocommerce, sell licenses, pmpro, mmpu, software license manager
 Requires at least: 4.7
-Tested up to: 4.9.2
-Stable tag: 2.0
+Tested up to: 4.9.3
+Stable tag: 2.1
 
 Sell Software License Manager licenses from WooCommerce or Paid Memberships Pro. Includes support for the Multiple Memberships Per User PMPro add-on.
 
@@ -36,6 +36,13 @@ NOTE: This plugin will simplify selling license keys from your WooCommerce Shop,
 1. Configure the License Manager connection using either the WooCommerce "Settings" -> "Products" -> "Software Licenses" tab, or the Paid Memberships Pro "Memberships" -> "Software Licenses" Settings page. You will need to supply the Create License secret key, and the Verify License Secret key, plus the URL to the server where the Software License Manager server software is running (even if that is the same server as you're using for WooCommerce or PMPro).
 
 == Changelog ==
+
+== v2.1 ==
+
+* ENHANCEMENT: Updated Utilities module
+* BUG FIX: Didn't set the $e20rlm_order global for valid subscription orders when using WooCommerce
+* BUG FIX: Fatal error when received $order is empty for WooCommerce
+* BUG FIX: Fatal error when received $order is empty for PMPro
 
 == v2.0 ==
 
