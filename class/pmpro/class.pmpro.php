@@ -346,9 +346,10 @@ class PMPro {
 			$order = $e20rlm_order;
 		}
 		
-		if ( $source == 'pmpro' ) {
+		if ( $source == 'pmpro' && !empty( $order ) && isset( $order->payment_transaction_id ) ) {
 			
 			$txn_id = ! empty( $order->payment_transaction_id ) ? $order->payment_transaction_id : null;
+			$e20rlm_order = null;
 		}
 		
 		return $txn_id;
