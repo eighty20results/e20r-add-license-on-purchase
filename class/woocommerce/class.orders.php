@@ -267,9 +267,10 @@ class Orders {
 			global $e20rlm_order;
 			
 			$order = $e20rlm_order;
+			$e20rlm_order = null;
 		}
 		
-		if ( 'woocommerce' == $source ) {
+		if ( 'woocommerce' == $source && ( !is_null( $order) && method_exists( $order, 'get_id' ) ) ) {
 			$txn_id = $order->get_id();
 		}
 		
